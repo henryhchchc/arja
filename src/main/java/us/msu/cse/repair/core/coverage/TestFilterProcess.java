@@ -12,111 +12,111 @@ import us.msu.cse.repair.core.util.ProcessWithTimeout;
 import us.msu.cse.repair.core.util.StreamReaderThread;
 
 public class TestFilterProcess {
-	Set<LCNode> faultyLines;
-	String faultyLinesInfoPath;
+    Set<LCNode> faultyLines;
+    String faultyLinesInfoPath;
 
-	Set<String> orgPositiveTests;
-	String orgPosTestsInfoPath;
+    Set<String> orgPositiveTests;
+    String orgPosTestsInfoPath;
 
-	String binJavaDir;
-	String binTestDir;
-	Set<String> dependences;
+    String binJavaDir;
+    String binTestDir;
+    Set<String> dependences;
 
-	String externalProjRoot;
+    String externalProjRoot;
 
-	String jvmPath;
-	
+    String jvmPath;
+    
 
-	public TestFilterProcess(Set<LCNode> faultyLines, String faultyLinesInfoPath, Set<String> orgPositiveTests,
-			String orgPosTestsInfoPath, String binJavaDir, String binTestDir, Set<String> dependences,
-			String externalProjRoot, String jvmPath) {
-		this.faultyLines = faultyLines;
-		this.faultyLinesInfoPath = faultyLinesInfoPath;
+    public TestFilterProcess(Set<LCNode> faultyLines, String faultyLinesInfoPath, Set<String> orgPositiveTests,
+            String orgPosTestsInfoPath, String binJavaDir, String binTestDir, Set<String> dependences,
+            String externalProjRoot, String jvmPath) {
+        this.faultyLines = faultyLines;
+        this.faultyLinesInfoPath = faultyLinesInfoPath;
 
-		this.orgPositiveTests = orgPositiveTests;
-		this.orgPosTestsInfoPath = orgPosTestsInfoPath;
+        this.orgPositiveTests = orgPositiveTests;
+        this.orgPosTestsInfoPath = orgPosTestsInfoPath;
 
-		this.binJavaDir = binJavaDir;
-		this.binTestDir = binTestDir;
+        this.binJavaDir = binJavaDir;
+        this.binTestDir = binTestDir;
 
-		this.dependences = dependences;
-		this.externalProjRoot = externalProjRoot;
+        this.dependences = dependences;
+        this.externalProjRoot = externalProjRoot;
 
-		this.jvmPath = jvmPath;
-	}
+        this.jvmPath = jvmPath;
+    }
 
-	public Set<String> getFilteredPositiveTests() throws IOException, InterruptedException {
-		List<String> params = new ArrayList<String>();
-		params.add(jvmPath);
-		params.add("-cp");
+    public Set<String> getFilteredPositiveTests() throws IOException, InterruptedException {
+        List<String> params = new ArrayList<String>();
+        params.add(jvmPath);
+        params.add("-cp");
 
-		File jarDir = new File(externalProjRoot, "lib/*");
-		File binExternalDir = new File(externalProjRoot, "bin");
+        File jarDir = new File(externalProjRoot, "lib/*");
+        File binExternalDir = new File(externalProjRoot, "bin");
 
-		String cpStr = "";
-		cpStr += jarDir.getCanonicalPath() + File.pathSeparator;
-		cpStr += binExternalDir.getCanonicalPath();
-		params.add(cpStr);
+        String cpStr = "";
+        cpStr += jarDir.getCanonicalPath() + File.pathSeparator;
+        cpStr += binExternalDir.getCanonicalPath();
+        params.add(cpStr);
 
-		params.add("us.msu.cse.repair.external.coverage.TestFilter");
+        params.add("us.msu.cse.repair.external.coverage.TestFilter");
 
-		params.add(binJavaDir);
-		params.add(binTestDir);
+        params.add(binJavaDir);
+        params.add(binTestDir);
 
-		if (dependences == null || dependences.isEmpty())
-			params.add(File.pathSeparator);
-		else {
-			String dps = "";
-			for (String cls : dependences)
-				dps += (cls + File.pathSeparator);
-			params.add(dps);
-		}
+        if (dependences == null || dependences.isEmpty())
+            params.add(File.pathSeparator);
+        else {
+            String dps = "";
+            for (String cls : dependences)
+                dps += (cls + File.pathSeparator);
+            params.add(dps);
+        }
 
-		if (faultyLinesInfoPath != null)
-			params.add("@" + faultyLinesInfoPath);
-		else {
-			String fls = "";
-			for (LCNode node : faultyLines) {
-				String className = node.getClassName();
-				int lineNumber = node.getLineNumber();
-				fls += (className + "#" + lineNumber + File.pathSeparator);
-			}
-			params.add(fls);
-		}
+        if (faultyLinesInfoPath != null)
+            params.add("@" + faultyLinesInfoPath);
+        else {
+            String fls = "";
+            for (LCNode node : faultyLines) {
+                String className = node.getClassName();
+                int lineNumber = node.getLineNumber();
+                fls += (className + "#" + lineNumber + File.pathSeparator);
+            }
+            params.add(fls);
+        }
 
-		if (orgPosTestsInfoPath != null)
-			params.add("@" + orgPosTestsInfoPath);
-		else {
-			String opts = "";
-			for (String test : orgPositiveTests)
-				opts += (test + File.pathSeparator);
-			params.add(opts);
-		}
+        if (orgPosTestsInfoPath != null)
+            params.add("@" + orgPosTestsInfoPath);
+        else {
+            String opts = "";
+            for (String test : orgPositiveTests)
+                opts += (test + File.pathSeparator);
+            params.add(opts);
+        }
 
-		ProcessBuilder builder = new ProcessBuilder(params);
-		builder.redirectOutput();
-		builder.redirectErrorStream(true);
-		builder.directory();
-		builder.environment().put("TZ", "America/Los_Angeles");
+        ProcessBuilder builder = new ProcessBuilder(params);
+        builder.redirectOutput();
+        builder.redirectErrorStream(true);
+        builder.directory();
+        builder.environment().put("TZ", "America/Los_Angeles");
 
-		Process process = builder.start();
+        Process process = builder.start();
 
-		StreamReaderThread streamReaderThread = new StreamReaderThread(process.getInputStream());
-		streamReaderThread.start();
+        StreamReaderThread streamReaderThread = new StreamReaderThread(process.getInputStream());
+        streamReaderThread.start();
 
-		ProcessWithTimeout processWithTimeout = new ProcessWithTimeout(process);
-		processWithTimeout.waitForProcess(0);
+        ProcessWithTimeout processWithTimeout = new ProcessWithTimeout(process);
+        processWithTimeout.waitForProcess(0);
 
-		streamReaderThread.join();
-		List<String> output = streamReaderThread.getOutput();
+        streamReaderThread.join();
+        List<String> output = streamReaderThread.getOutput();
 
-		Set<String> filteredPositiveTests = new HashSet<String>();
-		for (String str : output) {
-			if (str.startsWith("FilteredTest"))
-				filteredPositiveTests.add(str.split(":")[1].trim());
-		}
+        Set<String> filteredPositiveTests = new HashSet<String>();
+        for (String str : output) {
+            if (str.startsWith("FilteredTest"))
+                filteredPositiveTests.add(str.split(":")[1].trim());
+        }
 
-		return filteredPositiveTests;
-	}
+        return filteredPositiveTests;
+    }
 
 }

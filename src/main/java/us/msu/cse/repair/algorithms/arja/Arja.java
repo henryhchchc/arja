@@ -5,7 +5,7 @@ import us.msu.cse.repair.ec.problems.ArjaProblem;
 import jmetal.metaheuristics.nsgaII.NSGAII;
 
 public class Arja extends AbstractRepairAlgorithm {
-	public Arja(ArjaProblem problem) throws Exception {
-		algorithm = new NSGAII(problem);
-	}
+    public Arja(ArjaProblem problem) throws Exception {
+        algorithm = new NSGAII(problem);
+    }
 }

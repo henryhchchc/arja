@@ -8,24 +8,24 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 
 public class ReturnStatementASTVisitor extends ASTVisitor {
-	List<ReturnStatement> returnStatements;
+    List<ReturnStatement> returnStatements;
 
-	public ReturnStatementASTVisitor() {
-		returnStatements = new ArrayList<ReturnStatement>();
-	}
+    public ReturnStatementASTVisitor() {
+        returnStatements = new ArrayList<ReturnStatement>();
+    }
 
-	@Override
-	public boolean visit(ReturnStatement rs) {
-		returnStatements.add(rs);
-		return true;
-	}
+    @Override
+    public boolean visit(ReturnStatement rs) {
+        returnStatements.add(rs);
+        return true;
+    }
 
-	@Override
-	public boolean visit(AnonymousClassDeclaration acd) {
-		return false;
-	}
+    @Override
+    public boolean visit(AnonymousClassDeclaration acd) {
+        return false;
+    }
 
-	public List<ReturnStatement> getReturnStatements() {
-		return this.returnStatements;
-	}
+    public List<ReturnStatement> getReturnStatements() {
+        return this.returnStatements;
+    }
 }

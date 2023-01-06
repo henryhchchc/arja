@@ -10,30 +10,30 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
 public class ReturnOrThrowStatementASTVisitor extends ASTVisitor {
-	List<Statement> rtStatements;
+    List<Statement> rtStatements;
 
-	public ReturnOrThrowStatementASTVisitor() {
-		rtStatements = new ArrayList<Statement>();
-	}
+    public ReturnOrThrowStatementASTVisitor() {
+        rtStatements = new ArrayList<Statement>();
+    }
 
-	@Override
-	public boolean visit(ReturnStatement rs) {
-		rtStatements.add(rs);
-		return true;
-	}
+    @Override
+    public boolean visit(ReturnStatement rs) {
+        rtStatements.add(rs);
+        return true;
+    }
 
-	@Override
-	public boolean visit(ThrowStatement ts) {
-		rtStatements.add(ts);
-		return true;
-	}
+    @Override
+    public boolean visit(ThrowStatement ts) {
+        rtStatements.add(ts);
+        return true;
+    }
 
-	@Override
-	public boolean visit(AnonymousClassDeclaration acd) {
-		return false;
-	}
+    @Override
+    public boolean visit(AnonymousClassDeclaration acd) {
+        return false;
+    }
 
-	public List<Statement> getReturnThrowStatements() {
-		return this.rtStatements;
-	}
+    public List<Statement> getReturnThrowStatements() {
+        return this.rtStatements;
+    }
 }

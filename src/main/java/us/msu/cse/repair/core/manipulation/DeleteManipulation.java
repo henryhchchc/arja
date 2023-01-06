@@ -9,24 +9,24 @@ import us.msu.cse.repair.core.parser.ModificationPoint;
 
 public class DeleteManipulation extends AbstractManipulation {
 
-	public DeleteManipulation(ModificationPoint mp, Statement ingredStatement, ASTRewrite rewriter) {
-		super(mp, ingredStatement, rewriter);
-		// TODO Auto-generated constructor stub
-	}
+    public DeleteManipulation(ModificationPoint mp, Statement ingredStatement, ASTRewrite rewriter) {
+        super(mp, ingredStatement, rewriter);
+        // TODO Auto-generated constructor stub
+    }
 
-	@Override
-	public boolean manipulate() {
-		// TODO Auto-generated method stub
-		Statement statement = mp.getStatement();
-		if (statement.getParent() instanceof Block) {
-			Block block = (Block) statement.getParent();
-			ListRewrite lrw = rewriter.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-			lrw.remove(statement, null);
-		} else {
-			Statement emptyStatement = statement.getAST().newEmptyStatement();
-			rewriter.replace(statement, emptyStatement, null);
-		}
-		return true;
-	}
+    @Override
+    public boolean manipulate() {
+        // TODO Auto-generated method stub
+        Statement statement = mp.getStatement();
+        if (statement.getParent() instanceof Block) {
+            Block block = (Block) statement.getParent();
+            ListRewrite lrw = rewriter.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+            lrw.remove(statement, null);
+        } else {
+            Statement emptyStatement = statement.getAST().newEmptyStatement();
+            rewriter.replace(statement, emptyStatement, null);
+        }
+        return true;
+    }
 
 }

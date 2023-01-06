@@ -40,218 +40,218 @@ import us.msu.cse.repair.core.parser.SeedStatementInfo;
 import us.msu.cse.repair.core.util.Helper;
 
 public class InitASTVisitor extends ASTVisitor {
-	String sourceFilePath;
+    String sourceFilePath;
 
-	Map<LCNode, Double> faultyLines;
-	Set<LCNode> seedLines;
+    Map<LCNode, Double> faultyLines;
+    Set<LCNode> seedLines;
 
-	List<ModificationPoint> modificationPoints;
-	Map<SeedStatement, SeedStatementInfo> seedStatements;
+    List<ModificationPoint> modificationPoints;
+    Map<SeedStatement, SeedStatementInfo> seedStatements;
 
-	Map<String, ITypeBinding> declaredClasses;
+    Map<String, ITypeBinding> declaredClasses;
 
-	public InitASTVisitor(String sourceFilePath, Map<LCNode, Double> faultyLines, Set<LCNode> seedLines,
-			List<ModificationPoint> modificationPoints, Map<SeedStatement, SeedStatementInfo> seedStatements,
-			Map<String, ITypeBinding> declaredClasses) {
-		this.sourceFilePath = sourceFilePath;
-		this.faultyLines = faultyLines;
-		this.seedLines = seedLines;
+    public InitASTVisitor(String sourceFilePath, Map<LCNode, Double> faultyLines, Set<LCNode> seedLines,
+            List<ModificationPoint> modificationPoints, Map<SeedStatement, SeedStatementInfo> seedStatements,
+            Map<String, ITypeBinding> declaredClasses) {
+        this.sourceFilePath = sourceFilePath;
+        this.faultyLines = faultyLines;
+        this.seedLines = seedLines;
 
-		this.modificationPoints = modificationPoints;
-		this.seedStatements = seedStatements;
+        this.modificationPoints = modificationPoints;
+        this.seedStatements = seedStatements;
 
-		this.declaredClasses = declaredClasses;
-	}
+        this.declaredClasses = declaredClasses;
+    }
 
-	private void insertStatement(Statement statement) {
-		AbstractTypeDeclaration td = Helper.getAbstractTypeDeclaration(statement);
+    private void insertStatement(Statement statement) {
+        AbstractTypeDeclaration td = Helper.getAbstractTypeDeclaration(statement);
 
-		String className = td.resolveBinding().getBinaryName();
+        String className = td.resolveBinding().getBinaryName();
 
-		CompilationUnit cu = (CompilationUnit) statement.getRoot();
-		int lineNumber = cu.getLineNumber(statement.getStartPosition());
+        CompilationUnit cu = (CompilationUnit) statement.getRoot();
+        int lineNumber = cu.getLineNumber(statement.getStartPosition());
 
-		LCNode lcNode = new LCNode(className, lineNumber);
+        LCNode lcNode = new LCNode(className, lineNumber);
 
-		if (faultyLines.containsKey(lcNode)) {
-			ModificationPoint mp = new ModificationPoint();
+        if (faultyLines.containsKey(lcNode)) {
+            ModificationPoint mp = new ModificationPoint();
 
-			double suspValue = faultyLines.get(lcNode);
-			boolean isInStaticMethod = Helper.isInStaticMethod(statement);
+            double suspValue = faultyLines.get(lcNode);
+            boolean isInStaticMethod = Helper.isInStaticMethod(statement);
 
-			mp.setSourceFilePath(sourceFilePath);
-			mp.setLCNode(lcNode);
-			mp.setSuspValue(suspValue);
-			mp.setStatement(statement);
-			mp.setInStaticMethod(isInStaticMethod);
+            mp.setSourceFilePath(sourceFilePath);
+            mp.setLCNode(lcNode);
+            mp.setSuspValue(suspValue);
+            mp.setStatement(statement);
+            mp.setInStaticMethod(isInStaticMethod);
 
-			modificationPoints.add(mp);
-		}
+            modificationPoints.add(mp);
+        }
 
-		if (seedLines == null || seedLines.contains(lcNode)) {
-			SeedStatement seedStatement = new SeedStatement(statement);
+        if (seedLines == null || seedLines.contains(lcNode)) {
+            SeedStatement seedStatement = new SeedStatement(statement);
 
-			if (seedStatements.containsKey(seedStatement)) {
-				SeedStatementInfo ssi = seedStatements.get(seedStatement);
-				ssi.getSourceFilePaths().add(sourceFilePath);
-				ssi.getLCNodes().add(lcNode);
-			} else {
-				List<LCNode> lcNodes = new ArrayList<LCNode>();
-				lcNodes.add(lcNode);
-				List<String> sourceFilePaths = new ArrayList<String>();
-				sourceFilePaths.add(sourceFilePath);
+            if (seedStatements.containsKey(seedStatement)) {
+                SeedStatementInfo ssi = seedStatements.get(seedStatement);
+                ssi.getSourceFilePaths().add(sourceFilePath);
+                ssi.getLCNodes().add(lcNode);
+            } else {
+                List<LCNode> lcNodes = new ArrayList<LCNode>();
+                lcNodes.add(lcNode);
+                List<String> sourceFilePaths = new ArrayList<String>();
+                sourceFilePaths.add(sourceFilePath);
 
-				SeedStatementInfo ssi = new SeedStatementInfo(lcNodes, sourceFilePaths);
-				seedStatements.put(seedStatement, ssi);
-			}
+                SeedStatementInfo ssi = new SeedStatementInfo(lcNodes, sourceFilePaths);
+                seedStatements.put(seedStatement, ssi);
+            }
 
-		}
-	}
+        }
+    }
 
-	@Override
-	public boolean visit(TypeDeclaration node) {
-		if (!node.isInterface()) {
-			ITypeBinding tb = node.resolveBinding();
-			if (tb != null) {
-				String name = tb.getBinaryName();
-				declaredClasses.put(name, tb);
-			}
-		}
-		return true;
-	}
+    @Override
+    public boolean visit(TypeDeclaration node) {
+        if (!node.isInterface()) {
+            ITypeBinding tb = node.resolveBinding();
+            if (tb != null) {
+                String name = tb.getBinaryName();
+                declaredClasses.put(name, tb);
+            }
+        }
+        return true;
+    }
 
-	@Override
-	public boolean visit(AnonymousClassDeclaration node) {
-		ITypeBinding tb = node.resolveBinding();
-		if (tb != null) {
-			String name = tb.getBinaryName();
-			declaredClasses.put(name, tb);
-		}
-		return true;
-	}
+    @Override
+    public boolean visit(AnonymousClassDeclaration node) {
+        ITypeBinding tb = node.resolveBinding();
+        if (tb != null) {
+            String name = tb.getBinaryName();
+            declaredClasses.put(name, tb);
+        }
+        return true;
+    }
 
-	@Override
-	public boolean visit(EnumDeclaration node) {
-		ITypeBinding tb = node.resolveBinding();
-		if (tb != null) {
-			String name = tb.getBinaryName();
-			declaredClasses.put(name, tb);
-		}
+    @Override
+    public boolean visit(EnumDeclaration node) {
+        ITypeBinding tb = node.resolveBinding();
+        if (tb != null) {
+            String name = tb.getBinaryName();
+            declaredClasses.put(name, tb);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public boolean visit(AssertStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(AssertStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(BreakStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(BreakStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(ContinueStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(ContinueStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(DoStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(DoStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(EmptyStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(EmptyStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(ExpressionStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(ExpressionStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(ForStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(ForStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(EnhancedForStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(EnhancedForStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(IfStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(IfStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(LabeledStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(LabeledStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(ReturnStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(ReturnStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(SwitchCase node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(SwitchCase node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(SwitchStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(SwitchStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(SynchronizedStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(SynchronizedStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(ThrowStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(ThrowStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(TryStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(TryStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(TypeDeclarationStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(TypeDeclarationStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(VariableDeclarationStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(VariableDeclarationStatement node) {
+        insertStatement(node);
+        return true;
+    }
 
-	@Override
-	public boolean visit(WhileStatement node) {
-		insertStatement(node);
-		return true;
-	}
+    @Override
+    public boolean visit(WhileStatement node) {
+        insertStatement(node);
+        return true;
+    }
 }
