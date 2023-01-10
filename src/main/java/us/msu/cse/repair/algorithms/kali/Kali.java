@@ -38,8 +38,8 @@ public class Kali extends AbstractRepairProblem {
         Collections.sort(modificationPoints, new Comparator<ModificationPoint>() {
             @Override
             public int compare(ModificationPoint o1, ModificationPoint o2) {
-                Double d1 = new Double(o1.getSuspValue());
-                Double d2 = new Double(o2.getSuspValue());
+                Double d1 = Double.valueOf(o1.getSuspValue());
+                Double d2 = Double.valueOf(o2.getSuspValue());
                 return d2.compareTo(d1);
             }
         });

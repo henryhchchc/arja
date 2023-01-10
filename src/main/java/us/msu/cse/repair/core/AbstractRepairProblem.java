@@ -132,6 +132,8 @@ public abstract class AbstractRepairProblem extends Problem {
     
     protected Boolean diffFormat;
 
+    protected String infoLocation;
+
     protected String jvmPath;
     protected List<String> compilerOptions;
 
@@ -144,6 +146,7 @@ public abstract class AbstractRepairProblem extends Problem {
 
     protected static long launchTime;
     protected static int evaluations;
+
 
     
 
@@ -164,6 +167,8 @@ public abstract class AbstractRepairProblem extends Problem {
         faultyLinesInfoPath = (String) parameters.get("faultyLinesInfoPath");
     
         gzoltarDataDir = (String) parameters.get("gzoltarDataDir");
+        
+        infoLocation = (String) parameters.get("infoFile");
         
         String id = Helper.getRandomID();
         
@@ -298,11 +303,12 @@ public abstract class AbstractRepairProblem extends Problem {
     void invokeFaultLocalizer() throws FileNotFoundException, IOException {
         System.out.println("Fault localization starts...");
         IFaultLocalizer faultLocalizer;
-        if (gzoltarDataDir == null)
-            faultLocalizer = new GZoltarFaultLocalizer(binJavaClasses, binExecuteTestClasses, binJavaDir, binTestDir,
-                    dependences);
-        else
-            faultLocalizer = new GZoltarFaultLocalizer2(gzoltarDataDir);
+        // if (gzoltarDataDir == null)
+        //     faultLocalizer = new GZoltarFaultLocalizer(binJavaClasses, binExecuteTestClasses, binJavaDir, binTestDir,
+        //             dependences);
+        // else
+        //     faultLocalizer = new GZoltarFaultLocalizer2(gzoltarDataDir);
+        faultLocalizer = PredefinedFaultLocalizer.load(infoLocation);
 
         faultyLines = faultLocalizer.searchSuspicious(thr);
 
@@ -368,8 +374,8 @@ public abstract class AbstractRepairProblem extends Problem {
             Collections.sort(modificationPoints, new Comparator<ModificationPoint>() {
                 @Override
                 public int compare(ModificationPoint o1, ModificationPoint o2) {
-                    Double d1 = new Double(o1.getSuspValue());
-                    Double d2 = new Double(o2.getSuspValue());
+                    Double d2 = Double.valueOf(o2.getSuspValue());
+                    Double d1 = Double.valueOf(o1.getSuspValue());
                     return d2.compareTo(d1);
                 }
             });

@@ -64,5 +64,6 @@ public class ArjaMain {
         repairAlg.addOperator("selection", selection);
         
         repairAlg.execute();
+
     }
 }

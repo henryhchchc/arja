@@ -111,6 +111,8 @@ public class Interpreter {
             e.printStackTrace();
         }
 
+        parameters.put("infoFile", parameterStrs.get("infoFile"));
+
         
         return parameters;
     }
